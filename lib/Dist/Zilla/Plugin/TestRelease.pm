@@ -25,16 +25,16 @@ This plugin was originally contributed by Christopher J. Madsen.
 
 use File::pushd ();
 use Moose::Autobox;
-use Path::Class ();
+use Path::Tiny ();
 
 sub before_release {
   my ($self, $tgz) = @_;
   $tgz = $tgz->absolute;
 
-  my $build_root = $self->zilla->root->subdir('.build');
+  my $build_root = $self->zilla->root->child('.build');
   $build_root->mkpath unless -d $build_root;
 
-  my $tmpdir = Path::Class::dir( File::Temp::tempdir(DIR => $build_root) );
+  my $tmpdir = Path::Tiny::path( File::Temp::tempdir(DIR => $build_root) );
 
   $self->log("Extracting $tgz to $tmpdir");
 
@@ -49,14 +49,14 @@ sub before_release {
     unless @files;
 
   # Run tests on the extracted tarball:
-  my $target = $tmpdir->subdir( $self->zilla->dist_basename );
+  my $target = $tmpdir->child( $self->zilla->dist_basename );
 
   local $ENV{RELEASE_TESTING} = 1;
   local $ENV{AUTHOR_TESTING} = 1;
   $self->zilla->run_tests_in($target);
 
   $self->log("all's well; removing $tmpdir");
-  $tmpdir->rmtree;
+  $tmpdir->remove_tree;
 }
 
 __PACKAGE__->meta->make_immutable;

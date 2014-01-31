@@ -9,13 +9,12 @@ with 'Dist::Zilla::Role::ConfigDumper';
 use Moose::Autobox 0.09; # ->flatten
 use MooseX::Types::Moose qw(ArrayRef Bool HashRef Object Str);
 use MooseX::Types::Perl qw(DistName LaxVersionStr);
-use MooseX::Types::Path::Class qw(Dir File);
+use MooseX::Types::Path::Tiny qw(Path Dir File);
 use Moose::Util::TypeConstraints;
 
 use Dist::Zilla::Types qw(License);
 
 use Log::Dispatchouli 1.100712; # proxy_loggers, quiet_fatal
-use Path::Class;
 use Path::Tiny;
 use List::Util qw(first);
 use Software::License 0.101370; # meta2_name
@@ -443,7 +442,7 @@ nearly always be the current working directory in which C<dzil> was run.
 
 has root => (
   is   => 'ro',
-  isa  => Dir,
+  isa  => Path,
   coerce   => 1,
   required => 1,
 );
@@ -630,10 +629,10 @@ sub _write_out_file {
   # Okay, this is a bit much, until we have ->debug. -- rjbs, 2008-06-13
   # $self->log("writing out " . $file->name);
 
-  my $file_path = file($file->name);
+  my $file_path = path($file->name);
 
-  my $to_dir = $build_root->subdir( $file_path->dir );
-  my $to = $to_dir->file( $file_path->basename );
+  my $to_dir = $build_root->child( $file_path->parent );
+  my $to = $to_dir->child( $file_path->basename );
   $to_dir->mkpath unless -e $to_dir;
   die "not a directory: $to_dir" unless -d $to_dir;
 

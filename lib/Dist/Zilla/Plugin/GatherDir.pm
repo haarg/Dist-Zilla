@@ -3,7 +3,7 @@ package Dist::Zilla::Plugin::GatherDir;
 
 use Moose;
 use Moose::Autobox;
-use MooseX::Types::Path::Class qw(Dir File);
+use MooseX::Types::Path::Tiny qw(Path Dir File);
 with 'Dist::Zilla::Role::FileGatherer';
 
 use namespace::autoclean;
@@ -38,7 +38,7 @@ files into a subdir of your dist, you might write:
 use File::Find::Rule;
 use File::HomeDir;
 use File::Spec;
-use Path::Class;
+use Path::Tiny;
 
 use namespace::autoclean;
 
@@ -52,7 +52,7 @@ configuration file is located.
 
 has root => (
   is   => 'ro',
-  isa  => Dir,
+  isa  => Path,
   lazy => 1,
   coerce   => 1,
   required => 1,
@@ -141,16 +141,16 @@ sub gather_files {
 
   my $root = "" . $self->root;
   $root =~ s{^~([\\/])}{File::HomeDir->my_home . $1}e;
-  $root = Path::Class::dir($root);
+  $root = Path::Tiny::path($root);
 
   my $rule = File::Find::Rule->new();
   $rule->extras({follow => $self->follow_symlinks});
   FILE: for my $filename ($rule->file->in($root)) {
-    my $file = file($filename)->relative($root);
+    my $file = Path::Tiny::path($filename)->relative($root);
 
     unless ($self->include_dotfiles) {
       next FILE if $file->basename =~ qr/^\./;
-      next FILE if grep { /^\.[^.]/ } $file->dir->dir_list;
+      next FILE if grep { /^\.[^.]/ } File::Spec->splitdir($file);
     }
 
     next if $file =~ $exclude_regex;
@@ -159,9 +159,10 @@ sub gather_files {
     # _file_from_filename is overloaded in GatherDir::Template
     my $fileobj = $self->_file_from_filename($filename);
 
-    $file = Path::Class::file($self->prefix, $file) if $self->prefix;
+    $file = Path::Tiny::path($self->prefix, $file) if $self->prefix;
 
-    $fileobj->name($file->as_foreign('Unix')->stringify);
+    require File::Spec::Unix;
+    $fileobj->name(File::Spec::Unix->catdir(File::Spec->splitdir($file)));
     $self->add_file($fileobj);
   }
 

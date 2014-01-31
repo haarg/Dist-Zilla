@@ -93,14 +93,14 @@ sub expand_config_package_name {
 }
 
 sub _global_config_root {
-  require Path::Class;
-  return Path::Class::dir($ENV{DZIL_GLOBAL_CONFIG_ROOT}) if $ENV{DZIL_GLOBAL_CONFIG_ROOT};
+  require Path::Tiny;
+  return Path::Tiny::path($ENV{DZIL_GLOBAL_CONFIG_ROOT}) if $ENV{DZIL_GLOBAL_CONFIG_ROOT};
 
   require File::HomeDir;
   my $homedir = File::HomeDir->my_home
     or Carp::croak("couldn't determine home directory");
 
-  return Path::Class::dir($homedir)->subdir('.dzil');
+  return Path::Tiny::path($homedir)->child('.dzil');
 }
 
 sub _assert_loaded_class_version_ok {
