@@ -148,7 +148,7 @@ sub prompt_str {
     print "\n";
   }
 
-  my $input = $decode->($input_bytes);
+  my $input = $decode->($input_bytes) // q{};
   chomp $input;
 
   return $input;

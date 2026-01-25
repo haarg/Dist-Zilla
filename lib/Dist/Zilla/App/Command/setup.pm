@@ -116,7 +116,7 @@ Do you want to enter your PAUSE account details? ',
     );
 
     $pause{password} = $chrome->prompt_str(
-      "What is your PAUSE password? ",
+      "What is your PAUSE password (you can leave this blank to be prompted)? ",
       {
         check   => sub { length $_[0] },
         noecho  => 1,

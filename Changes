@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - avoid warning on undef input to prompts
+        - when prompting for PAUSE password, suggest that leaving it blank is
+          okay
 
 6.036     2025-11-09 18:07:15-05:00 America/New_York
         - re-fix the re-exporter format_author_deps (thanks, Graham Knop!)
